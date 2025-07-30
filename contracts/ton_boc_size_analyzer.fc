@@ -1,0 +1,56 @@
+#include "imports/stdlib.fc";
+
+;; OP CODES
+const op::fill_storage = "op::fill_storage"c; ;; create an opcode from string using the "c" prefix, this results in 0xc1e1bc59 opcode in this case
+
+
+() recv_internal(int my_balance, int msg_value, cell in_msg_full, slice in_msg_body) impure {
+
+    if (in_msg_body.slice_empty?()) { ;; ignore all empty messages
+        return ();
+    }
+
+    slice cs = in_msg_full.begin_parse();
+    int flags = cs~load_uint(4);
+    if (flags & 1) { ;; ignore all bounced messages
+        return ();
+    }
+
+    slice sender_address = cs~load_msg_addr();
+
+    int op = in_msg_body~load_uint(32); ;; by convention, the first 32 bits of incoming message is the op
+
+    int max_cells = 10;
+
+    if (op == op::fill_storage) {
+        cell data = in_msg_body~load_ref();
+        set_data(data);
+
+        ;; computing for the input as well
+        (int x, int y, int z, int success) = data.compute_data_size?(10);
+        ~strdump("for the input");
+        ~dump(x);
+        ~dump(y);
+        ~dump(z);
+        ~dump(success);
+    }
+
+    else {
+        throw(0xffff); ;; if the message contains an op that is not known to this contract, we throw
+    }
+
+    return();
+}
+
+;; cell version
+(int, int, int, int) get_results_for_cell(int max_cells) method_id {
+    cell data = get_data();
+    return data.compute_data_size?(max_cells);
+}
+
+;; slice version
+(int, int, int, int) get_results_for_slice(int max_cells) method_id {
+    cell data = get_data();
+    slice cdata = data.begin_parse();
+    return cdata.slice_compute_data_size?(max_cells);  
+}

@@ -1,0 +1,4 @@
+import { Cell } from "@ton/core"
+import * as TonBocSizeAnalyzer from './wrappers/TonBocSizeAnalyzer';
+export { TonBocSizeAnalyzer };
+export const TonBocSizeAnalyzerCode = Cell.fromHex("b5ee9c72410106010088000114ff00f4a413f4bcf2c80b01020162020300a4d06c2220c700915be001d0d3033071b09130e0d31f018210c1e1bc59ba8e2cd43020ed547af9406fa56fa18bd666f722074686520696e7075748fe143003fe203001fe2030fe2030fe20309530840ff2f0e202015804050019b95dfed44d001f9426fa56fa180017b924eed4401f9406fa56fa18cc02fbf7");
