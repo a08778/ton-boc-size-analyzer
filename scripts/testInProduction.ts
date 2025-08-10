@@ -7,7 +7,7 @@ export type Expectation = {};
 export async function run(provider: NetworkProvider) {
     const tonBocSizeAnalyzer = provider.open(TonBocSizeAnalyzer.createFromConfig({}, await compile('TonBocSizeAnalyzer')));
 
-    let root, cell_1, cell_2, the_same_cell, cell_1_1, cell_2_1, bottom_cell_1, bottom_cell_2;
+    let root, cell_1, cell_2, the_same_cell, cell_1_1, cell_2_1, bottom_cell_1, bottom_cell_2, cell_1_1_1, cell_2_1_1;
     let expected : Expectation;
 
     root = beginCell().endCell();
@@ -121,6 +121,21 @@ export async function run(provider: NetworkProvider) {
         success: true
     };
     await execute(root, BigInt(10), 'Different references order', expected, tonBocSizeAnalyzer, provider);
+
+    cell_2_1_1 = beginCell().storeUint(1, 1).endCell();
+    cell_1_1_1 = beginCell().storeUint(0, 1).endCell();
+    cell_2_1 = beginCell().storeRef(cell_2_1_1).endCell();
+    cell_1_1 = beginCell().storeRef(cell_1_1_1).endCell();
+    cell_2 = beginCell().storeRef(cell_2_1).endCell();
+    cell_1 = beginCell().storeRef(cell_1_1).endCell();
+    root = beginCell().storeRef(cell_1).storeRef(cell_2).endCell();  
+    expected = {
+        uniqueCells: 7,
+        dataBits: 2,
+        references: 6,
+        success: true
+    };
+    await execute(root, BigInt(10), 'Identical structures except for the deepest level', expected, tonBocSizeAnalyzer, provider);
 
     cell_2 = beginCell().storeUint(1,1).endCell();
     cell_1 = beginCell().storeUint(0,1).endCell();

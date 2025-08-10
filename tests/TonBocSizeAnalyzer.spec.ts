@@ -286,6 +286,37 @@ describe('TonBocSizeAnalyzer', () => {
         expect(resultForSlice).toEqual(expected);   
     });
 
+    it('Identical structures except for the deepest level', async () => {    
+
+        // arrange
+        const maxCells = BigInt(10);
+
+        const cell_2_1_1 = beginCell().storeUint(1, 1).endCell();
+        const cell_1_1_1 = beginCell().storeUint(0, 1).endCell();
+        const cell_2_1 = beginCell().storeRef(cell_2_1_1).endCell();
+        const cell_1_1 = beginCell().storeRef(cell_1_1_1).endCell();
+        const cell_2 = beginCell().storeRef(cell_2_1).endCell();
+        const cell_1 = beginCell().storeRef(cell_1_1).endCell();
+        const root = beginCell().storeRef(cell_1).storeRef(cell_2).endCell();  
+        
+        // act
+        await tonBocSizeAnalyzer.sendFillStorage(launcher.getSender(), toNano('0.01'), root);
+
+        // assert
+        const resultForCell = await tonBocSizeAnalyzer.getResultsForCell(maxCells);
+        const resultForSlice = await tonBocSizeAnalyzer.getResultsForCell(maxCells);
+
+        const expected = {
+            uniqueCells: 7,
+            dataBits: 2,
+            references: 6,
+            success: true
+         };
+         
+        expect(resultForCell).toEqual(expected);    
+        expect(resultForSlice).toEqual(expected);   
+    });
+
     it('Different references order', async () => {    
 
         // arrange
